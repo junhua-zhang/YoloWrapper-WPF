@@ -1,6 +1,8 @@
 /DeepLearning/Assets/Weights/
 /DeepLearning/bin/
+/DeepLearning/obj/
 /ObjectDetectionGui/bin/
+/ObjectDetectionGui/obj/
 *.suo
 *.sdf
 *.opensdf
@@ -11,3 +13,7 @@
 /x64/
 /Debug/
 /.vs/
+*/*.dll
+DeepLearning/obj/Debug/
+DeepLearning/Assets/
+DeepLearning/obj/Release/DeepLearning.dll

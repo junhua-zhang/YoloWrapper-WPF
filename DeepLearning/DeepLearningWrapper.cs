@@ -13,8 +13,9 @@ namespace DeepLearning
         #region Const
 
         public const int MAX_OBJECTS_NUMBER = 1000;
-        private const string DEEP_LEARNING_LIBRARY_DLL_CPU_VERSION = @"\x64\yolo_cpp_dll.dll";
-        private const string DEEP_LEARNING_LIBRARY_DLL_GPU_VERSION = @"\x64\yolo_cpp_gpu.dll";
+        //private const string DEEP_LEARNING_LIBRARY_DLL_CPU_VERSION = @"\x64\yolo_cpp_dll.dll";
+        private const string DEEP_LEARNING_LIBRARY_DLL_GPU_VERSION = @"\x64\detector.dll";
+        //private const string DEEP_LEARNING_LIBRARY_DLL_GPU_VERSION = @"\x64\yolo_cpp_dll.dll";
 
         #endregion
 
@@ -32,27 +33,11 @@ namespace DeepLearning
         }
 
         #endregion
-
-        #region DllImport Cpu
-
-        [DllImport(DEEP_LEARNING_LIBRARY_DLL_CPU_VERSION, EntryPoint = "init")]
-        public static extern int InitializeNetInCpu(string configrationFilenamr, string weightFileanme, int gpu);
-
-        [DllImport(DEEP_LEARNING_LIBRARY_DLL_CPU_VERSION, EntryPoint = "detect_image")]
-        internal static extern int DetectImageInCpu(string filename, ref BoundingBoxContainer container);
-
-        [DllImport(DEEP_LEARNING_LIBRARY_DLL_CPU_VERSION, EntryPoint = "detect_mat")]
-        internal static extern int DetectImageInCpu(IntPtr pArray, int nSize, ref BoundingBoxContainer container);
-
-        [DllImport(DEEP_LEARNING_LIBRARY_DLL_CPU_VERSION, EntryPoint = "dispose")]
-        internal static extern int DisposeNetInCpu();
-
-        #endregion
-
+        
         #region DllImport Gpu
 
         [DllImport(DEEP_LEARNING_LIBRARY_DLL_GPU_VERSION, EntryPoint = "init")]
-        internal static extern int InitializeNetInGpu(string configurationFilename, string weightsFilename, int gpu);
+        internal static extern int InitializeNetInGpu(string configurationFilename, string weightsFilename);
 
         [DllImport(DEEP_LEARNING_LIBRARY_DLL_GPU_VERSION, EntryPoint = "detect_image")]
         internal static extern int DetectImageInGpu(string filename, ref BoundingBoxContainer container);
@@ -63,61 +48,26 @@ namespace DeepLearning
         [DllImport(DEEP_LEARNING_LIBRARY_DLL_GPU_VERSION, EntryPoint = "dispose")]
         internal static extern int DisposeNetInGpu();
 
-        [DllImport(DEEP_LEARNING_LIBRARY_DLL_GPU_VERSION, EntryPoint = "get_device_count")]
-        internal static extern int GetDeviceCount();
-
-        [DllImport(DEEP_LEARNING_LIBRARY_DLL_GPU_VERSION, EntryPoint = "get_device_name")]
-        internal static extern int GetDeviceName(int gpu, StringBuilder deviceName);
-
         #endregion
 
         #region Dispose
 
         public void Dispose()
         {
-            switch (DetectionHardware)
-            {
-                case DetectionHardwares.CPU:
-                    DisposeNetInCpu();
-                    break;
-                case DetectionHardwares.GPU:
-                    DisposeNetInGpu();
-                    break;
-            }
+            DisposeNetInGpu();
         }
-
+        
         #endregion
-
+        
         #region Wrapper
 
         public void InitilizeDeepLearningNetwork(int gpu = 0)
         {
             if (m_NetConf == null)
                 m_NetConf = new NetConfigaration();
-
-            HardwareReport = new HardwareReports();
-
-            DetectionHardware = DetectionHardwares.CPU;
-            if (HardwareReport.IsCudaExists && HardwareReport.IsCudnnExists)
-                DetectionHardware = DetectionHardwares.GPU;
-
-            switch (DetectionHardware)
-            {
-                case DetectionHardwares.CPU:
-                    InitializeNetInCpu(m_NetConf.ConfigFile, m_NetConf.Weightfile, 0);
-                    break;
-                case DetectionHardwares.GPU:
-                    var deviceCount = GetDeviceCount();
-                    if (gpu > (deviceCount - 1))
-                        throw new IndexOutOfRangeException("Graphic device index is out of range");
-                    var deviceName = new StringBuilder();
-                    GetDeviceName(gpu, deviceName);
-                    HardwareReport.GraphicDeviceName = deviceName.ToString();
-                    InitializeNetInGpu(m_NetConf.ConfigFile, m_NetConf.Weightfile, gpu);
-                    break;
-                default:
-                    break;
-            }
+                                
+            InitializeNetInGpu(m_NetConf.ConfigFile, m_NetConf.Weightfile);
+            DetectionHardware = DetectionHardwares.GPU;
 
             var lines = File.ReadAllLines(m_NetConf.NamesFile);
             for (var i = 0; i < lines.Length; i++)
@@ -132,19 +82,12 @@ namespace DeepLearning
 
             var container = new BoundingBoxContainer();
             var count = 0;
-            switch (DetectionHardware)
-            {
-                case DetectionHardwares.CPU:
-                    count = DetectImageInCpu(imageFilePath, ref container);
-                    break;
-                case DetectionHardwares.GPU:
-                    count = DetectImageInGpu(imageFilePath, ref container);
-                    break;
-            }
 
+            DetectImageInGpu(imageFilePath, ref container);
             return Convert(container);
         }
 
+        
         public IEnumerable<DetectedItemInfo> Detect(byte[] imageData)
         {
             var container = new BoundingBoxContainer();
@@ -157,15 +100,9 @@ namespace DeepLearning
                 // Copy the array to unmanaged memory.
                 Marshal.Copy(imageData, 0, pnt, imageData.Length);
                 var count = 0;
-                switch (DetectionHardware)
-                {
-                    case DetectionHardwares.CPU:
-                        count = DetectImageInCpu(pnt, imageData.Length, ref container);
-                        break;
-                    case DetectionHardwares.GPU:
-                        count = DetectImageInGpu(pnt, imageData.Length, ref container);
-                        break;
-                }
+                
+                count = DetectImageInGpu(pnt, imageData.Length, ref container);
+                
             }
             catch (Exception exception)
             {
@@ -179,7 +116,7 @@ namespace DeepLearning
 
             return Convert(container);
         }
-
+        
         #endregion
 
         #region Utilities

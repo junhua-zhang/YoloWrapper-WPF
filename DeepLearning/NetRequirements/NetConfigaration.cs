@@ -4,9 +4,12 @@
     {
         #region Const
 
-        private const string CONFIG_FILE_PATH = @".\Assets\Cfg\yolov3.cfg";
-        private const string WEIGHT_FILE_PATH = @".\Assets\Weights\yolov3.weights";
-        private const string NAMES_FILE_PATH  = @".\Assets\Data\coco.names";
+        private const string CONFIG_FILE_PATH = @".\Assets\Cfg\yolov5x.cfg";
+        private const string WEIGHT_FILE_PATH = @".\Assets\Weights\x_best.weights";
+        private const string NAMES_FILE_PATH  = @".\Assets\Data\hair.names";
+        //private const string CONFIG_FILE_PATH = @".\Assets\Cfg\yolov3-spp.cfg";
+        //private const string WEIGHT_FILE_PATH = @".\Assets\Weights\yolov3-best.weights";
+        //private const string NAMES_FILE_PATH  = @".\Assets\Data\coco.names";
 
         #endregion
 

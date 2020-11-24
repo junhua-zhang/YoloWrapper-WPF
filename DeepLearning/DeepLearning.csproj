@@ -52,6 +52,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Assets\Cfg\yolov3-spp.cfg" />
     <None Include="Assets\Cfg\yolov3.cfg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -61,6 +62,9 @@
     <None Include="Assets\Data\coco.names">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="Assets\Data\hair.data" />
+    <None Include="Assets\Data\hair.names" />
+    <None Include="Assets\Weights\yolov3-best.weights" />
     <None Include="Assets\Weights\yolov3.weights">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

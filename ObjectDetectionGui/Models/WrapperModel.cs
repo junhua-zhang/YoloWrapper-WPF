@@ -45,17 +45,8 @@ namespace Models
 
         private void InitilizeHardware()
         {
-            switch (Wrapper.DetectionHardware)
-            {
-                case DeepLearning.Base.DetectionHardwares.CPU:
-                    NetHardware = "Process in CPU";
-                    break;
-                case DeepLearning.Base.DetectionHardwares.GPU:
-                    NetHardware = "Process in GPU";
-                    break;
-                default:
-                    break;
-            }
+            NetHardware = "Process in GPU";
+ 
         }
 
         #endregion
@@ -68,6 +59,7 @@ namespace Models
             sw.Start();
             List<DetectedItemInfo> items;
             items = Wrapper.Detect(FilePath).ToList();
+            Wrapper.Detect(FilePath);
             sw.Stop();
 
             DetectionElapsedTime = "Image processed in " + sw.Elapsed.TotalMilliseconds.ToString("F2") + " ms";
